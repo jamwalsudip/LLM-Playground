@@ -15,9 +15,15 @@ export const providers = {
           prompt,
           apiKey
         });
-        return response.data.output;
+        console.log('OpenAI Response:', response.data);
+        // OpenAI response format handling
+        if (Array.isArray(response.data.output)) {
+          return response.data.output[0]?.text || response.data.output[0]?.content || response.data.output;
+        }
+        return response.data.output?.text || response.data.output?.content || response.data.output;
       } catch (error: any) {
-        throw new Error(error.response?.data?.error || 'Failed to get completion');
+        console.error('OpenAI Error:', error);
+        throw new Error(error.response?.data?.error || 'Failed to get completion from OpenAI');
       }
     }
   },
@@ -33,9 +39,15 @@ export const providers = {
           prompt,
           apiKey
         });
-        return response.data.output;
+        console.log('Anthropic Response:', response.data);
+        // Anthropic response format handling
+        if (Array.isArray(response.data.output)) {
+          return response.data.output[0]?.text || response.data.output[0]?.content || response.data.output;
+        }
+        return response.data.output?.text || response.data.output;
       } catch (error: any) {
-        throw new Error(error.response?.data?.error || 'Failed to get completion');
+        console.error('Anthropic Error:', error);
+        throw new Error(error.response?.data?.error || 'Failed to get completion from Anthropic');
       }
     }
   },
@@ -52,8 +64,11 @@ export const providers = {
             contents: [{ parts: [{ text: prompt }] }]
           }
         );
+        console.log('Gemini Response:', response.data);
+        // Gemini response format handling
         return response.data.candidates[0].content.parts[0].text;
       } catch (error) {
+        console.error('Gemini Error:', error);
         throw new Error('Failed to get completion from Gemini');
       }
     }
