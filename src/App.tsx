@@ -35,7 +35,7 @@ export function App() {
           }
           
           try {
-            const response = await fetch('http://localhost:3000/api/generate', {
+            const response = await fetch(`${import.meta.env.VITE_API_URL}/generate`, {
               method: 'POST',
               headers: {
                 'Content-Type': 'application/json',
