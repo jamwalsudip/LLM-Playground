@@ -7,7 +7,6 @@ import { APIConfigModal } from './components/APIConfigModal';
 
 export function App() {
   const [prompt, setPrompt] = useState<string>('');
-  const [boxes, setBoxes] = useState<Box[]>([]);
   const [confirmedBoxes, setConfirmedBoxes] = useState<Box[]>([]);
   const [isSubmitted, setIsSubmitted] = useState<boolean>(false);
   const [isModalOpen, setIsModalOpen] = useState<boolean>(false);

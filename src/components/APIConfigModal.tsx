@@ -18,7 +18,6 @@ export function APIConfigModal({ isOpen, onClose, onConfirm, buttonRef }: APICon
 
   useEffect(() => {
     if (isOpen && buttonRef.current && modalRef.current) {
-      const buttonRect = buttonRef.current.getBoundingClientRect();
       const windowWidth = window.innerWidth;
       const modalWidth = modalRef.current.offsetWidth;
       

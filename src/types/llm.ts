@@ -1,5 +1,3 @@
-import type { ProviderKey } from '../services/providers';
-
 export interface LLMProvider {
   id: string;
   name: string;
