@@ -49,13 +49,16 @@ export function App() {
             });
             
             const data = await response.json();
+            console.log('API Response:', data);
             if (!response.ok) throw new Error(data.error);
             
-            return {
+            const updatedBox = {
               ...box,
               loading: false,
               response: `${data.output}`
             };
+            console.log('Updated Box:', updatedBox);
+            return updatedBox;
           } catch (error: any) {
             return {
               ...box,

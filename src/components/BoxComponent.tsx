@@ -22,6 +22,8 @@ export const BoxComponent: React.FC<BoxComponentProps> = ({
   response,
   onRemove
 }) => {
+  console.log('BoxComponent Props:', { id, provider, selectedModel, loading, error, response });
+
   return (
     <div 
       className="bg-white rounded-lg shadow-sm p-4"
@@ -45,8 +47,16 @@ export const BoxComponent: React.FC<BoxComponentProps> = ({
       <div className="mt-4">
         <div className="text-xs text-gray-400">response</div>
         <div className="mt-1 p-3 border border-gray-200 rounded-md min-h-[100px]">
-          <div className="text-sm text-gray-400">
-            {loading ? 'Processing...' : error ? error : response || 'No response yet'}
+          <div className="text-sm whitespace-pre-wrap">
+            {loading ? (
+              <span className="text-gray-400">Processing...</span>
+            ) : error ? (
+              <span className="text-red-500">{error}</span>
+            ) : response ? (
+              <span className="text-gray-700">{response}</span>
+            ) : (
+              <span className="text-gray-400">No response yet</span>
+            )}
           </div>
         </div>
       </div>
