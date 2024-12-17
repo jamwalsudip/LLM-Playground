@@ -52,10 +52,13 @@ export function App() {
             console.log('API Response:', data);
             if (!response.ok) throw new Error(data.error);
             
+            const responseText = data.output[0]?.text || data.output;
+            console.log('Response Text:', responseText);
+            
             const updatedBox = {
               ...box,
               loading: false,
-              response: `${data.output}`
+              response: responseText
             };
             console.log('Updated Box:', updatedBox);
             return updatedBox;

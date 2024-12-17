@@ -20,7 +20,7 @@ interface Box {
   output: string;
   loading: boolean;
   error: string | null;
-  response?: string;
+  response: string;  // Changed from optional to required
 }
 
 const providers: Providers = {
@@ -44,10 +44,16 @@ const LLMPlayground: React.FC = () => {
   const [isSubmitted, setIsSubmitted] = useState<boolean>(false);
 
   const handleSubmit = async () => {
+    if (!prompt.trim()) {
+      return;
+    }
+
     setIsSubmitted(true);
     setConfirmedBoxes(confirmedBoxes.map(box => ({
       ...box,
-      loading: true
+      loading: true,
+      error: null,
+      response: ''
     })));
 
     try {
@@ -61,18 +67,51 @@ const LLMPlayground: React.FC = () => {
       ));
 
       setConfirmedBoxes(prev => 
-        prev.map((box, index) => ({
-          ...box,
-          loading: false,
-          response: responses[index].data.output,
-          error: null
-        }))
+        prev.map((box, index) => {
+          const output = responses[index].data.output;
+          let processedResponse = '';
+
+          try {
+            // Handle array of output objects
+            if (Array.isArray(output)) {
+              processedResponse = output
+                .filter(item => item.type === 'text')
+                .map(item => item.text)
+                .join('\n');
+            } 
+            // Handle direct string output
+            else if (typeof output === 'string') {
+              processedResponse = output;
+            }
+            // Handle object output
+            else if (typeof output === 'object' && output !== null) {
+              processedResponse = output.text || JSON.stringify(output);
+            }
+
+            return {
+              ...box,
+              loading: false,
+              response: processedResponse || 'No response content',
+              error: null
+            };
+          } catch (err) {
+            console.error('Error processing response:', err);
+            return {
+              ...box,
+              loading: false,
+              response: '',
+              error: 'Failed to process response'
+            };
+          }
+        })
       );
     } catch (error) {
+      console.error('Error in handleSubmit:', error);
       setConfirmedBoxes(prev =>
         prev.map(box => ({
           ...box,
           loading: false,
+          response: '',
           error: 'Failed to generate response. Please try again.'
         }))
       );
@@ -89,7 +128,8 @@ const LLMPlayground: React.FC = () => {
         selectedModel: '',
         output: '',
         loading: false,
-        error: null
+        error: null,
+        response: ''  // Initialize with empty string
       }
     ]);
   };
@@ -160,9 +200,10 @@ const LLMPlayground: React.FC = () => {
             <div className="group">
               <button
                 onClick={handleSubmit}
+                disabled={!prompt.trim()}
                 className={`w-14 h-14 flex items-center justify-center transition-colors ${
                   isSubmitted ? 'bg-green-600' : 'bg-black'
-                } rounded-[30px]`}
+                } rounded-[30px] ${!prompt.trim() ? 'opacity-50 cursor-not-allowed' : ''}`}
               >
                 <Check className="w-6 h-6 text-white transition-transform duration-200 group-hover:scale-125" />
               </button>
@@ -198,7 +239,7 @@ const LLMPlayground: React.FC = () => {
                 <div className="flex justify-between items-start mb-1">
                   <div>
                     <div className="text-xl font-bold">{providers[box.provider].name}</div>
-                    <div className="text-sm">{box.selectedModel}</div>
+                    <div className="text-sm text-gray-600">{box.selectedModel}</div>
                   </div>
                   <button 
                     onClick={() => removeBox(box.id)}
@@ -211,9 +252,15 @@ const LLMPlayground: React.FC = () => {
                 <div className="mt-4">
                   <div className="text-xs text-gray-400">response</div>
                   <div className="mt-1 p-3 border border-gray-200 rounded-md min-h-[100px]">
-                    <div className="text-sm text-gray-400">
-                      {box.loading ? 'Processing...' : box.error ? box.error : box.response || 'sample response...'}
-                    </div>
+                    {box.loading ? (
+                      <div className="text-sm text-gray-400">Processing...</div>
+                    ) : box.error ? (
+                      <div className="text-sm text-red-500">{box.error}</div>
+                    ) : (
+                      <div className="text-sm text-gray-600 whitespace-pre-wrap">
+                        {box.response || 'Waiting for response...'}
+                      </div>
+                    )}
                   </div>
                 </div>
               </div>
